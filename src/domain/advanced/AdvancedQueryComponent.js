@@ -19,7 +19,7 @@ const TRAPIQueryButton = ({TRAPIQuery}) => {
     <Header>Current TRAPI Query</Header>
     <Modal.Content>
       <p style={{"whiteSpace": "pre-wrap"}}>
-        {JSON.stringify(TRAPIQuery(), null, 2)}
+        {JSON.stringify(TRAPIQuery(true), null, 2)}
       </p>
     </Modal.Content>
   </Modal>
@@ -94,35 +94,52 @@ class AdvancedQuery extends Component {
   }
 
   //get trapi query for cy graph
-  TRAPIQuery() {
+  //sequentialNumbering - number nodes and edges sequential eg. node01, node02, edge01, edge02, etc
+  TRAPIQuery(sequentialNumbering = false) {
     let jsonGraph = this.cyJSON();
     let nodes = {};
+
+    //store mapping from hashes to sequential numbering
+    let mapping = {};
     if (jsonGraph && jsonGraph.elements.nodes) {
-      jsonGraph.elements.nodes.forEach((node) => {
-        nodes[node.data.id] = {};
+      jsonGraph.elements.nodes.forEach((node, i) => {
+        let id = node.data.id;
+        if (sequentialNumbering) {
+          id = `n${(i+1)}`;
+          mapping[node.data.id] = id;
+        } else {
+          mapping[node.data.id] = node.data.id;
+        }
+
+        nodes[id] = {};
 
         //don't include ids or categories field if they are empty arrays
         if (Array.isArray(node.data.ids) && node.data.ids.length > 0) {
-          nodes[node.data.id].ids = node.data.ids;
+          nodes[id].ids = node.data.ids;
         };
         if (Array.isArray(node.data.categories) && node.data.categories.length > 0) {
-          nodes[node.data.id].categories = _.map(node.data.categories, category => `biolink:${category}`);
+          nodes[id].categories = _.map(node.data.categories, category => `biolink:${category}`);
         }
       });
     }
 
     let edges = {};
     if (jsonGraph && jsonGraph.elements.edges) {
-      jsonGraph.elements.edges.forEach((edge) => {
+      jsonGraph.elements.edges.forEach((edge, i) => {
+        let id = edge.data.id;
+        if (sequentialNumbering) {
+          id = `e${(i+1)}`;
+        }
+
         let pred = _.map(edge.data.predicates, predicate => `biolink:${predicate}`);
-        edges[edge.data.id] = {
-          "subject": edge.data.source,
-          "object": edge.data.target
+        edges[id] = {
+          "subject": mapping[edge.data.source],
+          "object": mapping[edge.data.target]
         };
 
         //only include predicates field if it is defined
         if (pred.length) {
-          edges[edge.data.id].prediates = pred;
+          edges[id].prediates = pred;
         }
       });
     }
