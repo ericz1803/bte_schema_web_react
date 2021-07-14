@@ -1,8 +1,11 @@
 import React, { Component, useState } from 'react';
-import { Button, Header, Container, Modal, Message, Menu } from 'semantic-ui-react';
+import { Button, Header, Container, Modal, Message, Menu, Form, TextArea } from 'semantic-ui-react';
+
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
 import AdvancedQueryGraph from './graph/AdvancedQueryGraphComponent';
+import { convertTRAPItoEles } from './utils';
+
 import axios from 'axios';
 import _ from 'lodash';
 
@@ -50,6 +53,34 @@ const ARSDisplay = ({arsPK}) => {
   }
 }
 
+const ImportGraphButton = ({importGraph}) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [value, setValue] = useState(''); //keep track of form value
+
+  const handleSubmit = () => {
+    importGraph(JSON.parse(value));
+    setModalOpen(false);
+  }
+
+  return <Modal
+    closeIcon
+    open={modalOpen}
+    trigger={<Button basic color='violet'>Import Graph</Button>}
+    onClose={() => setModalOpen(false)}
+    onOpen={() => setModalOpen(true)}
+  >
+    <Header>Import Graph From TRAPI</Header>
+    <Modal.Content>
+      <Form>
+        <TextArea value={value} onChange={(e) => setValue(e.target.value)} rows={10}/>
+        <Button color='violet' onClick={() => handleSubmit()} style={{marginTop: "0.5rem"}}>
+          Import
+        </Button>
+      </Form>
+    </Modal.Content>
+  </Modal>
+}
+
 class AdvancedQuery extends Component {
   constructor(props) {
     super(props);
@@ -68,6 +99,8 @@ class AdvancedQuery extends Component {
     this.setCy = this.setCy.bind(this);
     this.cyJSON = this.cyJSON.bind(this);
     this.TRAPIQuery = this.TRAPIQuery.bind(this);
+    this.clearGraph = this.clearGraph.bind(this);
+    this.importGraph = this.importGraph.bind(this);
 
     this.graphRef = React.createRef();
 
@@ -91,6 +124,21 @@ class AdvancedQuery extends Component {
   //cy graph in json format
   cyJSON() {
     return this.state.cy.json && this.state.cy.json();
+  }
+
+  clearGraph() {
+    this.state.cy.remove(this.state.cy.nodes());
+  }
+
+  //take in a trapi graph and display it in the visual query builder
+  importGraph(trapi) {
+    this.clearGraph();
+    let eles = convertTRAPItoEles(trapi);
+    this.state.cy.add(eles);
+    // let layout = this.state.cy.elements().layout({
+    //   name: 'random'
+    // });
+    // layout.run();
   }
 
   //get trapi query for cy graph
@@ -278,6 +326,7 @@ class AdvancedQuery extends Component {
         <Button color='violet' onClick={this.makeARSQuery} loading={this.state.loadingARS}>Query ARS</Button>
         
         <TRAPIQueryButton TRAPIQuery={this.TRAPIQuery}/>
+        <ImportGraphButton importGraph={this.importGraph}/>
 
         <Menu pointing secondary>
           <Menu.Item 
