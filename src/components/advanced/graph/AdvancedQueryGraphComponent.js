@@ -343,6 +343,7 @@ export default class AdvancedQueryGraph extends Component {
     });
 
     let eh = cy.edgehandles({hoverDelay: 0});
+    eh.disable();
 
     this.props.setCy(cy);
     this.setState({eh: eh}); 

@@ -133,12 +133,18 @@ class AdvancedQuery extends Component {
   //take in a trapi graph and display it in the visual query builder
   importGraph(trapi) {
     this.clearGraph();
-    let eles = convertTRAPItoEles(trapi);
-    this.state.cy.add(eles);
-    // let layout = this.state.cy.elements().layout({
-    //   name: 'random'
-    // });
-    // layout.run();
+    convertTRAPItoEles(trapi).then((eles) => {
+      this.state.cy.add(eles);
+      let layout = this.state.cy.elements().layout({
+        name: 'klay',
+        klay: {
+          edgeSpacingFactor: 2,
+          spacing: 100
+        }
+      });
+      layout.run();
+      layout.stop();
+    });
   }
 
   //get trapi query for cy graph
