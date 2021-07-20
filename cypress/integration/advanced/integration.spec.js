@@ -65,6 +65,7 @@ describe('Test Advanced Query Page', () => {
     cy.get('.tippy-content:visible').find('.delete').click();
   })
 
+  //enter query manually using id
   // it('Can enter a sample query', () => {
   //   cy.get('.button').contains('Edit').click();
   //   cy.get('#cy').click();
@@ -90,11 +91,13 @@ describe('Test Advanced Query Page', () => {
   //   cy.get('.tippy-content:visible').find('.delete').click();
   // })
 
+  // enter query using autocomplete (doesn't seem to work with cypress:run for some reason)
   it('Can enter a sample query', () => {
     cy.get('#cy').click();
     cy.wait(500);
     cy.get('#cy').click(100, 100);
     cy.get('.tippy-content:visible').find('.multiple').first().click().type('ebola');
+    cy.wait(5000);
     cy.get('.tippy-content:visible').find('.item').contains('Ebola hemorrhagic fever').click();
     cy.get('#cy').click();
     cy.wait(500);
