@@ -1,10 +1,11 @@
 import React, { Component, useState } from 'react';
-import { Button, Header, Container, Modal, Message, Menu, Form, TextArea } from 'semantic-ui-react';
+import { Button, Header, Container, Modal, Message, Menu, Form, TextArea, Icon, Accordion } from 'semantic-ui-react';
 
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
 import AdvancedQueryGraph from './graph/AdvancedQueryGraphComponent';
 import { convertTRAPItoEles } from './utils';
+import { simpleExample } from './examples';
 
 import axios from 'axios';
 import _ from 'lodash';
@@ -322,10 +323,40 @@ class AdvancedQuery extends Component {
   }
 
   render() {
+    let panels = [
+      {
+        key: "how-to",
+        title: "How do I use the visual query builder?",
+        content: {
+          content: (
+            <div>
+              <p>Use Edit mode to add attributes to nodes/edges and reposition nodes.</p>
+              <p>Left click while in Add Node mode to place nodes.</p>
+              <p>Click and drag while in Add Edge mode to create new edges.</p>
+              <p>Right click to remove nodes/edges.</p>
+            </div>
+          ) 
+        }
+      },
+      {
+        key: "examples",
+        title: "Examples",
+        content: {
+          content: (
+            <div>
+              <Button color='violet' basic onClick={(e) => {e.preventDefault(); this.importGraph(simpleExample)}}>Basic Example</Button>
+            </div>
+          )
+        } 
+      }
+    ];
     return (
       <Container className="feature">
         <Navigation name="Advanced" />
+        <div style={{marginTop: '0.5rem'}}><Icon circular name="info"/></div>
+        <Accordion panels={panels}/>
         
+
         <AdvancedQueryGraph ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} cy={this.state.cy} setCy={this.setCy}/>
         
         <Button color='violet' onClick={this.defaultQuery} loading={this.state.loading}>Query BTE</Button>
